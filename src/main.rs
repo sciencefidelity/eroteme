@@ -8,6 +8,9 @@ use warp::http::{Method, StatusCode};
 use warp::reject::Reject;
 use warp::{Filter, Rejection, Reply};
 
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
+struct QuestionId(String);
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct Question {
     id: QuestionId,
@@ -17,7 +20,14 @@ struct Question {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
-struct QuestionId(String);
+struct AnswerId(String);
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+struct Answer {
+    id: AnswerId,
+    content: String,
+    question_id: QuestionId,
+}
 
 #[derive(Debug)]
 struct Pagination {
@@ -28,6 +38,7 @@ struct Pagination {
 #[derive(Clone)]
 struct Store {
     questions: Arc<RwLock<HashMap<QuestionId, Question>>>,
+    answers: Arc<RwLock<HashMap<AnswerId, Answer>>>,
 }
 
 #[derive(Debug)]
@@ -41,6 +52,7 @@ impl Store {
     fn new() -> Self {
         Store {
             questions: Arc::new(RwLock::new(Self::init())),
+            answers: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
@@ -111,6 +123,28 @@ async fn delete_question(id: String, store: Store) -> Result<impl warp::Reply, w
         Some(_) => return Ok(warp::reply::with_status("Question deleted", StatusCode::OK)),
         None => return Err(warp::reject::custom(Error::QuestionNotFound)),
     }
+}
+
+async fn add_answer(
+    store: Store,
+    params: HashMap<String, String>,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    // TODO: create unique ids
+    // TODO: add proper error handling for missing parameters
+    // TODO: check if the question_id exists
+    let answer = Answer {
+        id: AnswerId("1".to_string()),
+        content: params.get("content").unwrap().to_string(),
+        question_id: QuestionId(params.get("questionId").unwrap().to_string()),
+    };
+
+    store
+        .answers
+        .write()
+        .await
+        .insert(answer.id.clone(), answer);
+
+    Ok(warp::reply::with_status("Answer added", StatusCode::OK))
 }
 
 // TODO: return some JSON with a message field
@@ -198,10 +232,18 @@ async fn main() {
         .and(store_filter.clone())
         .and_then(delete_question);
 
+    // TODO: change route to `/questions/:questionId/answers`
+    let add_answer = warp::post()
+        .and(warp::path("answers"))
+        .and(store_filter.clone())
+        .and(warp::body::form())
+        .and_then(add_answer);
+
     let routes = get_questions
         .or(add_question)
         .or(update_question)
         .or(delete_question)
+        .or(add_answer)
         .with(cors)
         .recover(return_error);
 
