@@ -1,7 +1,6 @@
 use q_and_a::routes;
 use q_and_a::store::Store;
 
-use handle_errors;
 use warp::http::Method;
 use warp::Filter;
 
