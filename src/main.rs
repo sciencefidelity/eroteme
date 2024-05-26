@@ -1,7 +1,7 @@
-use q_and_a::error;
 use q_and_a::routes;
 use q_and_a::store::Store;
 
+use handle_errors;
 use warp::http::Method;
 use warp::Filter;
 
@@ -57,7 +57,7 @@ async fn main() {
         .or(delete_question)
         .or(add_answer)
         .with(cors)
-        .recover(error::return_error);
+        .recover(handle_errors::return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
