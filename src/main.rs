@@ -12,6 +12,12 @@ async fn main() {
         .unwrap_or_else(|_| "handle_errors=warn,q_and_a=info,warp=error".to_owned());
 
     let store = Store::new("postgres://postgres@localhost:5432/qa").await;
+
+    sqlx::migrate!()
+        .run(&store.clone().connection)
+        .await
+        .expect("Cannot run migration");
+
     let store_filter = warp::any().map(move || store.clone());
 
     tracing_subscriber::fmt()
