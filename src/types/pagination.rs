@@ -20,7 +20,7 @@ pub struct Pagination {
 /// # Example usage
 /// ```rust
 /// use std::collections::HashMap;
-/// use erotetics::types::pagination;
+/// use eroteme::types::pagination;
 ///
 /// let mut query = HashMap::new();
 /// query.insert("limit".to_string(), "1".to_string());

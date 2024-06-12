@@ -1,4 +1,4 @@
-use erotetics::{routes, store::Store};
+use eroteme::{routes, store::Store};
 use std::env;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{http::Method, Filter};
@@ -6,9 +6,9 @@ use warp::{http::Method, Filter};
 #[tokio::main]
 async fn main() {
     let log_filter = env::var("RUST_LOG")
-        .unwrap_or_else(|_| "handle_errors=warn,erotetics=info,warp=error".to_owned());
+        .unwrap_or_else(|_| "handle_errors=warn,eroteme=info,warp=error".to_owned());
 
-    let store = Store::new("postgres://postgres:password@localhost:5432/erotetics").await;
+    let store = Store::new("postgres://postgres:password@localhost:5432/eroteme").await;
 
     sqlx::migrate!()
         .run(&store.clone().connection)

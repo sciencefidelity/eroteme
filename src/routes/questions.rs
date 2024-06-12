@@ -12,7 +12,7 @@ pub async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    event!(target: "erotetics", Level::INFO, "querying questions");
+    event!(target: "eroteme", Level::INFO, "querying questions");
 
     let pagination = if params.is_empty() {
         Pagination::default()
