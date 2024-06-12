@@ -10,6 +10,9 @@ pub struct Store {
 }
 
 impl Store {
+    /// # Panics
+    ///
+    /// Will panic if fails to establish a database connection.
     pub async fn new(db_url: &str) -> Self {
         let db_pool = match PgPoolOptions::new()
             .max_connections(5)
@@ -17,14 +20,17 @@ impl Store {
             .await
         {
             Ok(pool) => pool,
-            Err(e) => panic!("Couldn't establish DB connection: {}", e),
+            Err(e) => panic!("Couldn't establish DB connection: {e}"),
         };
 
-        Store {
+        Self {
             connection: db_pool,
         }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if the database query fails.
     pub async fn get_questions(
         &self,
         limit: Option<i32>,
@@ -50,6 +56,9 @@ impl Store {
         }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if the database query fails.
     pub async fn add_questions(&self, new_question: NewQuestion) -> Result<Question, Error> {
         match sqlx::query("INSERT INTO questions (title, Content, tags) VALUES ($1, $2, $3)")
             .bind(new_question.title)
@@ -72,6 +81,9 @@ impl Store {
         }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if the database query fails.
     pub async fn update_question(
         &self,
         question: Question,
@@ -104,6 +116,9 @@ impl Store {
         }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if the database query fails.
     pub async fn delete_question(&self, question_id: i32) -> Result<bool, Error> {
         match sqlx::query("DELETE FROM questions WHERE id = $1")
             .bind(question_id)
@@ -118,6 +133,9 @@ impl Store {
         }
     }
 
+    /// # Errors
+    ///
+    /// Will return `Err` if the database query fails.
     pub async fn add_answer(&self, new_answer: NewAnswer) -> Result<Answer, Error> {
         match sqlx::query("insert into answers (content, question_id) values ($1, $2)")
             .bind(new_answer.content)

@@ -3,6 +3,9 @@ use crate::Store;
 
 use warp::http::StatusCode;
 
+/// # Errors
+///
+/// Will return `Err` if the Warp filter fails to match the route
 pub async fn add_answer(
     store: Store,
     new_answer: NewAnswer,

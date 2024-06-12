@@ -1,10 +1,33 @@
 [package]
-name = "q_and_a"
+name = "erotetics"
 version = "0.1.0"
+authors = ["Matt Cook <hello@mattcook.dev>"] 
 edition = "2021"
+description = "Q&A API"
+readme = "README.md"
+repository = "https://github.com/sciencefidelity/erotetics"
+license = "MIT or Apache-2.0"
+exclude = ["./scripts"]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+enum_glob_use = "deny"
+pedantic = { level = "deny", priority = 1 }
+nursery = { level = "deny", priority = 2 }
+unwrap_used = "deny"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
 
 [dependencies]
 handle-errors = { path = "handle-errors" }
+reqwest = { version = "0.12", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sqlx = { version = "0.7", features = ["runtime-tokio", "tls-rustls", "migrate", "postgres"] }
@@ -13,3 +36,4 @@ tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "0.8", features = ["v4"] }
 warp = "0.3"
+

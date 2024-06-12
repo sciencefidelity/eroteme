@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+#[allow(clippy::module_name_repetitions)]
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub struct QuestionId(pub i32);
 
@@ -11,6 +12,7 @@ pub struct Question {
     pub tags: Option<Vec<String>>,
 }
 
+#[allow(clippy::module_name_repetitions)]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NewQuestion {
     pub title: String,

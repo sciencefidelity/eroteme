@@ -1,22 +1,19 @@
-use q_and_a::routes;
-use q_and_a::store::Store;
-
+use erotetics::{routes, store::Store};
 use std::env;
 use tracing_subscriber::fmt::format::FmtSpan;
-use warp::http::Method;
-use warp::Filter;
+use warp::{http::Method, Filter};
 
 #[tokio::main]
 async fn main() {
     let log_filter = env::var("RUST_LOG")
-        .unwrap_or_else(|_| "handle_errors=warn,q_and_a=info,warp=error".to_owned());
+        .unwrap_or_else(|_| "handle_errors=warn,erotetics=info,warp=error".to_owned());
 
-    let store = Store::new("postgres://postgres@localhost:5432/qa").await;
+    let store = Store::new("postgres://postgres:password@localhost:5432/erotetics").await;
 
     sqlx::migrate!()
         .run(&store.clone().connection)
         .await
-        .expect("Cannot run migration");
+        .expect("migrations failed");
 
     let store_filter = warp::any().map(move || store.clone());
 
@@ -67,7 +64,7 @@ async fn main() {
         .and(store_filter.clone())
         .and_then(routes::delete_question);
 
-    // TODO: change route to `/questions/:questionId/answers`
+    // TODO: change route to `/questions/:question_id/answers`
     let add_answer = warp::post()
         .and(warp::path("answers"))
         .and(store_filter.clone())

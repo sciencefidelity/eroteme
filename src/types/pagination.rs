@@ -20,7 +20,7 @@ pub struct Pagination {
 /// # Example usage
 /// ```rust
 /// use std::collections::HashMap;
-/// use q_and_a::types::pagination;
+/// use erotetics::types::pagination;
 ///
 /// let mut query = HashMap::new();
 /// query.insert("limit".to_string(), "1".to_string());
@@ -30,22 +30,29 @@ pub struct Pagination {
 /// assert_eq!(p.limit,Some(1));
 /// assert_eq!(p.offset, 10);
 /// ```
-pub fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination, Error> {
+///
+/// # Errors
+///
+/// Will return `Err` if `limit` or `offset` parameters are missing.
+#[allow(clippy::missing_panics_doc, clippy::module_name_repetitions)]
+pub fn extract_pagination<S: ::std::hash::BuildHasher>(
+    params: &HashMap<String, String, S>,
+) -> Result<Pagination, Error> {
     // TODO: handle start greater than end
-    if params.contains_key("limit") && params.contains_key("offest") {
+    if params.contains_key("limit") && params.contains_key("offset") {
         return Ok(Pagination {
-            // Takes the "limit" parameter and tries to convert it to a number
+            // Takes the `limit` parameter and tries to convert it to a number
             limit: Some(
                 params
                     .get("limit")
-                    .unwrap()
+                    .expect("limit param not set in map")
                     .parse::<i32>()
                     .map_err(Error::ParseError)?,
             ),
-            // Takes the "offest" parameter and tries to convert it to a number
+            // Takes the `offset` parameter and tries to convert it to a number
             offset: params
-                .get("offest")
-                .unwrap()
+                .get("offset")
+                .expect("offset param not set in map")
                 .parse::<i32>()
                 .map_err(Error::ParseError)?,
         });

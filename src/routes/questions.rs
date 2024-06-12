@@ -12,13 +12,14 @@ pub async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    event!(target: "q_and_a", Level::INFO, "querying questions.");
-    let mut pagination = Pagination::default();
+    event!(target: "erotetics", Level::INFO, "querying questions");
 
-    if !params.is_empty() {
+    let pagination = if params.is_empty() {
+        Pagination::default()
+    } else {
         event!(Level::INFO, pagination = true);
-        pagination = pagination::extract_pagination(params)?;
-    }
+        pagination::extract_pagination(&params)?
+    };
 
     match store
         .get_questions(pagination.limit, pagination.offset)
@@ -29,6 +30,9 @@ pub async fn get_questions(
     }
 }
 
+/// # Errors
+///
+/// Will return `Err` if the Warp filter fails to match the route
 pub async fn add_question(
     store: Store,
     new_question: NewQuestion,
@@ -39,6 +43,9 @@ pub async fn add_question(
     }
 }
 
+/// # Errors
+///
+/// Will return `Err` if the Warp filter fails to match the route
 pub async fn update_question(
     id: i32,
     store: Store,
@@ -50,10 +57,13 @@ pub async fn update_question(
     }
 }
 
+/// # Errors
+///
+/// Will return `Err` if the Warp filter fails to match the route
 pub async fn delete_question(id: i32, store: Store) -> Result<impl warp::Reply, warp::Rejection> {
     match store.delete_question(id).await {
         Ok(_) => Ok(warp::reply::with_status(
-            format!("Question {} deleted", id),
+            format!("Question {id} deleted"),
             StatusCode::OK,
         )),
         Err(e) => Err(warp::reject::custom(e)),
