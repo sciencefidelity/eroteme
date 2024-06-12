@@ -25,7 +25,7 @@ pub struct Pagination {
 /// let mut query = HashMap::new();
 /// query.insert("limit".to_string(), "1".to_string());
 /// query.insert("offset".to_string(), "10".to_string());
-/// let p = pagination::extract_pagination(query).unwrap();
+/// let p = pagination::extract_pagination(&query).unwrap();
 ///
 /// assert_eq!(p.limit,Some(1));
 /// assert_eq!(p.offset, 10);
