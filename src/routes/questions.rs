@@ -42,11 +42,15 @@ pub async fn add_question(
     let (title, content) = tokio::join!(title, content);
 
     if title.is_err() {
-        return Err(warp::reject::custom(title.unwrap_err()));
+        return Err(warp::reject::custom(
+            title.expect_err("profanity check on title failed"),
+        ));
     }
 
     if content.is_err() {
-        return Err(warp::reject::custom(content.unwrap_err()));
+        return Err(warp::reject::custom(
+            content.expect_err("profanity check on content failed"),
+        ));
     }
 
     let question = NewQuestion {
@@ -75,11 +79,15 @@ pub async fn update_question(
     let (title, content) = tokio::join!(title, content);
 
     if title.is_err() {
-        return Err(warp::reject::custom(title.unwrap_err()));
+        return Err(warp::reject::custom(
+            title.expect_err("profanity check on title failed"),
+        ));
     }
 
     if content.is_err() {
-        return Err(warp::reject::custom(content.unwrap_err()));
+        return Err(warp::reject::custom(
+            content.expect_err("profanity check on content failed"),
+        ));
     }
 
     let question = Question {
