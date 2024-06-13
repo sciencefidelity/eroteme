@@ -10,7 +10,8 @@ pub enum Error {
     ParseError(std::num::ParseIntError),
     MissingParameters,
     DatabaseQueryError,
-    ExternalAPIError(reqwest::Error),
+    ReqwestAPIError(reqwest::Error),
+    MiddlewareReqwestError(reqwest_middleware::Error),
     ClientError(APILayerError),
     ServerError(APILayerError),
 }
@@ -33,7 +34,8 @@ impl std::fmt::Display for Error {
             Error::ParseError(ref err) => write!(f, "cannot parse parameter: {err}"),
             Error::MissingParameters => write!(f, "missing parameter"),
             Error::DatabaseQueryError => write!(f, "cannot update, invalid data."),
-            Error::ExternalAPIError(err) => write!(f, "cannot execute: {err}"),
+            Error::ReqwestAPIError(err) => write!(f, "cannot execute: {err}"),
+            Error::MiddlewareReqwestError(err) => write!(f, "cannot execute: {err}"),
             Error::ClientError(err) => write!(f, "external client error: {err}"),
             Error::ServerError(err) => write!(f, "external server error: {err}"),
         }
@@ -51,7 +53,13 @@ pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
             crate::Error::DatabaseQueryError.to_string(),
             StatusCode::UNPROCESSABLE_ENTITY,
         ))
-    } else if let Some(crate::Error::ExternalAPIError(e)) = r.find() {
+    } else if let Some(crate::Error::ReqwestAPIError(e)) = r.find() {
+        event!(Level::ERROR, "{e}");
+        Ok(warp::reply::with_status(
+            "internal server error".to_string(),
+            StatusCode::INTERNAL_SERVER_ERROR,
+        ))
+    } else if let Some(crate::Error::MiddlewareReqwestError(e)) = r.find() {
         event!(Level::ERROR, "{e}");
         Ok(warp::reply::with_status(
             "internal server error".to_string(),
