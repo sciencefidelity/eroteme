@@ -13,6 +13,7 @@ env:
   CARGO_TERM_COLOR: always
   SQLX_VERSION: 0.7.1
   SQLX_FEATURES: "rustls,postgres"
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
   test:
