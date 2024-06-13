@@ -9,6 +9,10 @@ use warp::{Rejection, Reply};
 pub enum Error {
     ParseError(std::num::ParseIntError),
     MissingParameters,
+    WrongPassword,
+    CannotDecryptToken,
+    Unauthorized,
+    ArgonLibraryError(argon2::Error),
     DatabaseQueryError(sqlx::Error),
     ReqwestAPIError(reqwest::Error),
     MiddlewareReqwestError(reqwest_middleware::Error),
@@ -33,6 +37,10 @@ impl std::fmt::Display for Error {
         match self {
             Error::ParseError(ref err) => write!(f, "cannot parse parameter: {err}"),
             Error::MissingParameters => write!(f, "missing parameter"),
+            Error::WrongPassword => write!(f, "wrong password"),
+            Error::CannotDecryptToken => write!(f, "cannot decrypt token"),
+            Error::Unauthorized => write!(f, "no permission to change the underlying resource"),
+            Error::ArgonLibraryError(_) => write!(f, "cannot verify password"),
             Error::DatabaseQueryError(_) => write!(f, "cannot update, invalid data"),
             Error::ReqwestAPIError(err) => write!(f, "cannot execute: {err}"),
             Error::MiddlewareReqwestError(err) => write!(f, "cannot execute: {err}"),
@@ -75,6 +83,18 @@ pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
         Ok(warp::reply::with_status(
             "internal server error".to_string(),
             StatusCode::INTERNAL_SERVER_ERROR,
+        ))
+    } else if let Some(crate::Error::CannotDecryptToken) = r.find() {
+        event!(Level::ERROR, "not matching account id");
+        Ok(warp::reply::with_status(
+            "no presimmsion to change underlying resource".to_string(),
+            StatusCode::UNAUTHORIZED,
+        ))
+    } else if let Some(crate::Error::WrongPassword) = r.find() {
+        event!(Level::ERROR, "entered wrong password");
+        Ok(warp::reply::with_status(
+            "wrong email/password combination".to_string(),
+            StatusCode::UNAUTHORIZED,
         ))
     } else if let Some(crate::Error::MiddlewareReqwestError(e)) = r.find() {
         event!(Level::ERROR, "{e}");

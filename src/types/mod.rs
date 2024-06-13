@@ -1,5 +1,5 @@
 pub mod account;
-pub use account::Account;
+pub use account::{Account, AccountId, Session};
 
 pub mod answer;
 pub use answer::{Answer, AnswerId, NewAnswer};

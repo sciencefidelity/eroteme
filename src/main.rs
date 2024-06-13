@@ -32,27 +32,13 @@ async fn main() {
         .and(warp::path::end())
         .and(warp::query())
         .and(store_filter.clone())
-        .and_then(routes::get_questions)
-        .with(warp::trace(|info| {
-            tracing::info_span!(
-                "get_questions request",
-                method = %info.method(),
-                path = %info.path(),
-                id = %uuid::Uuid::new_v4(),
-            )
-        }));
-
-    let add_question = warp::post()
-        .and(warp::path("questions"))
-        .and(warp::path::end())
-        .and(store_filter.clone())
-        .and(warp::body::json())
-        .and_then(routes::add_question);
+        .and_then(routes::get_questions);
 
     let update_question = warp::put()
         .and(warp::path("questions"))
         .and(warp::path::param::<i32>())
         .and(warp::path::end())
+        .and(routes::authentication::auth())
         .and(store_filter.clone())
         .and(warp::body::json())
         .and_then(routes::update_question);
@@ -61,12 +47,23 @@ async fn main() {
         .and(warp::path("questions"))
         .and(warp::path::param::<i32>())
         .and(warp::path::end())
+        .and(routes::authentication::auth())
         .and(store_filter.clone())
         .and_then(routes::delete_question);
 
     // TODO: change route to `/questions/:question_id/answers`
+    let add_question = warp::post()
+        .and(warp::path("questions"))
+        .and(warp::path::end())
+        .and(routes::authentication::auth())
+        .and(store_filter.clone())
+        .and(warp::body::json())
+        .and_then(routes::add_question);
+
     let add_answer = warp::post()
         .and(warp::path("answers"))
+        .and(warp::path::end())
+        .and(routes::authentication::auth())
         .and(store_filter.clone())
         .and(warp::body::form())
         .and_then(routes::add_answer);
@@ -76,14 +73,22 @@ async fn main() {
         .and(warp::path::end())
         .and(store_filter.clone())
         .and(warp::body::json())
-        .and_then(routes::authentication::register);
+        .and_then(routes::register);
+
+    let login = warp::post()
+        .and(warp::path("login"))
+        .and(warp::path::end())
+        .and(store_filter.clone())
+        .and(warp::body::json())
+        .and_then(routes::login);
 
     let routes = get_questions
-        .or(add_question)
         .or(update_question)
+        .or(add_question)
         .or(delete_question)
         .or(add_answer)
         .or(registration)
+        .or(login)
         .with(cors)
         .with(warp::trace::request())
         .recover(handle_errors::return_error);

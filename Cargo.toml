@@ -26,7 +26,9 @@ panic = "abort"
 strip = "symbols"
 
 [dependencies]
+chrono = "0.4"
 handle-errors = { path = "handle-errors" }
+paseto = "2.0"
 rand = "0.8.5"
 reqwest = { version = "0.12", features = ["json"] }
 reqwest-middleware = "0.3"
