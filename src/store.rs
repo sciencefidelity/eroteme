@@ -10,10 +10,14 @@ pub struct Store {
 }
 
 impl Store {
+    /// # Errors
+    ///
+    /// Will return `Err` if the database migration fails.
+    ///
     /// # Panics
     ///
     /// Will panic if fails to establish a database connection.
-    pub async fn new(db_url: &str) -> Self {
+    pub async fn new(db_url: &str) -> Result<Self, sqlx::Error> {
         let db_pool = match PgPoolOptions::new()
             .max_connections(5)
             .connect(db_url)
@@ -23,9 +27,9 @@ impl Store {
             Err(e) => panic!("Couldn't establish DB connection: {e}"),
         };
 
-        Self {
+        Ok(Self {
             connection: db_pool,
-        }
+        })
     }
 
     /// # Errors

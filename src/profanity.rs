@@ -1,3 +1,5 @@
+use std::env;
+
 use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::{Deserialize, Serialize};
@@ -28,16 +30,22 @@ pub struct BadWordsResponse {
 /// # Errors
 ///
 /// Will return `Err` if the API call responds with an error.
+///
+/// # Panics
+///
+/// Will panic if `BAD_WORDS_API_KEY` is not set.
 #[allow(clippy::module_name_repetitions)]
 pub async fn check_profanity(content: String) -> Result<String, handle_errors::Error> {
+    let api_key = env::var("BAD_WORDS_API_KEY").expect("BadWords API key not set");
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
+
     let client = ClientBuilder::new(reqwest::Client::new())
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
 
     let res = client
         .post("https://api.apilayer.com/bad_words?censor_character=*")
-        .header("apikey", "API_KEY")
+        .header("apikey", api_key)
         .body(content)
         .send()
         .await
