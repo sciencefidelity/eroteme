@@ -1,3 +1,6 @@
+pub mod account;
+pub use account::Account;
+
 pub mod answer;
 pub use answer::{Answer, AnswerId, NewAnswer};
 

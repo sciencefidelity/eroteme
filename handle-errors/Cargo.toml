@@ -6,5 +6,6 @@ edition = "2021"
 [dependencies]
 reqwest = "0.12"
 reqwest-middleware = "0.3"
+sqlx = { version = "0.7", features = [ "postgres" ] }
 tracing = { version = "0.1", features = ["log"] }
 warp = "0.3"
