@@ -1,6 +1,6 @@
 [package]
 name = "eroteme"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Matt Cook <hello@mattcook.dev>"] 
 edition = "2021"
 description = "Q&A API"
@@ -28,9 +28,9 @@ strip = "symbols"
 [dependencies]
 chrono = "0.4"
 clap = { version = "4.5.7", features = ["derive"] }
-config = { version = "0.14.0", features = ["toml"] } 
 dotenv = "0.15.0"
 handle-errors = { path = "handle-errors" }
+openssl = { version = "0.10.32", features = ["vendored"] }
 paseto = "2.0"
 rand = "0.8.5"
 reqwest = { version = "0.12", features = ["json"] }
@@ -46,3 +46,5 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "0.8", features = ["v4"] }
 warp = "0.3"
 
+[build-dependencies]
+platforms = "2.0.0"

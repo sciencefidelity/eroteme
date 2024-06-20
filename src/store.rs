@@ -24,7 +24,7 @@ impl Store {
             .await
         {
             Ok(pool) => pool,
-            Err(e) => panic!("Couldn't establish DB connection: {e}"),
+            Err(e) => panic!("couldn't establish DB connection: {e}"),
         };
 
         Ok(Self {

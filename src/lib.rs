@@ -1,3 +1,6 @@
+pub mod config;
+pub use config::Config;
+
 pub mod profanity;
 use profanity::check_profanity;
 

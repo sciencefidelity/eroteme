@@ -1,62 +1,20 @@
-use clap::Parser;
-use eroteme::{routes, store::Store};
-use serde::Deserialize;
+use eroteme::{routes, store::Store, Config};
 use std::env;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{http::Method, Filter};
 
-/// Eroteme web service API
-#[derive(Parser, Debug, Default, Deserialize, PartialEq)]
-#[clap(author, version, about, long_about = None)]
-struct Args {
-    /// Which errors we want to log (info, warn, or error)
-    #[clap(short, long, default_value = "warn")]
-    log_level: String,
-    /// URL for the postgres database
-    #[clap(long, default_value = "postgres")]
-    db_user: String,
-    /// Database password
-    #[clap(long, default_value = "password")]
-    db_password: String,
-    /// Database hostname
-    #[clap(long, default_value = "localhost")]
-    db_host: String,
-    /// Port number for the postgres database
-    #[clap(long, default_value = "5432")]
-    db_port: u16,
-    /// Database name
-    #[clap(long, default_value = "eroteme")]
-    db_name: String,
-}
-
 #[tokio::main]
 async fn main() -> Result<(), handle_errors::Error> {
-    dotenv::dotenv().ok();
+    let config = Config::new().expect("failed to set config");
 
-    assert!(
-        env::var("BAD_WORDS_API_KEY").is_ok(),
-        "missing BadWords API key"
+    let log_filter = format!(
+        "handle_errors={},eroteme={},warp={}",
+        config.log_level, config.log_level, config.log_level
     );
-
-    assert!(env::var("PASETO_KEY").is_ok(), "missing Paseto key");
-
-    let port = env::var("PORT")
-        .ok()
-        .map_or(Ok(8080), |val| val.parse::<u16>())
-        .map_err(handle_errors::Error::ParseError)?;
-
-    let args = Args::parse();
-
-    let log_filter = env::var("RUST_LOG").unwrap_or_else(|_| {
-        format!(
-            "handle_errors={},eroteme={},warp={}",
-            args.log_level, args.log_level, args.log_level
-        )
-    });
 
     let store = Store::new(&format!(
         "postgres://{}:{}@{}:{}/{}",
-        args.db_user, args.db_password, args.db_host, args.db_port, args.db_name
+        config.db_user, config.db_password, config.db_host, config.db_port, config.db_name
     ))
     .await
     .map_err(handle_errors::Error::DatabaseQueryError)?;
@@ -144,7 +102,9 @@ async fn main() -> Result<(), handle_errors::Error> {
         .with(warp::trace::request())
         .recover(handle_errors::return_error);
 
-    warp::serve(routes).run(([127, 0, 0, 1], port)).await;
+    tracing::info!("Eroteme build ID {}", env!("EROTEME_VERSION"));
+
+    warp::serve(routes).run(([127, 0, 0, 1], config.port)).await;
 
     Ok(())
 }
