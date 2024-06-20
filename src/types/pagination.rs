@@ -2,7 +2,7 @@ use handle_errors::Error;
 use std::collections::HashMap;
 
 /// Pagination struct that is getting extracted from query params
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct Pagination {
     /// The index of the last item to be returned
     pub limit: Option<i32>,
@@ -62,7 +62,7 @@ pub fn extract_pagination<S: ::std::hash::BuildHasher>(
 }
 
 #[cfg(test)]
-mod tests {
+mod pagination_tests {
     use super::{extract_pagination, Error, HashMap, Pagination};
 
     #[test]

@@ -1,9 +1,9 @@
 [package]
-name = "handle-errors"
+name = "mock-server"
 version = "1.0.0"
 authors = ["Matt Cook <hello@mattcook.dev>"] 
 edition = "2021"
-repository = "https://github.com/sciencefidelity/eroteme/handle-errors"
+repository = "https://github.com/sciencefidelity/eroteme/mock-server"
 license = "MIT or Apache-2.0"
 
 [lints.clippy]
@@ -20,9 +20,8 @@ panic = "abort"
 strip = "symbols"
 
 [dependencies]
-reqwest = "0.12"
-reqwest-middleware = "0.3"
-rust-argon2 = "2.1"
-sqlx = { version = "0.7", features = [ "postgres" ] }
-tracing = { version = "0.1", features = ["log"] }
+bytes = "1"
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
 warp = "0.3"
+

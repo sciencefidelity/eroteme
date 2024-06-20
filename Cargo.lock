@@ -556,6 +556,7 @@ dependencies = [
  "clap",
  "dotenv",
  "handle-errors",
+ "mock-server",
  "openssl",
  "paseto",
  "platforms",
@@ -839,7 +840,7 @@ dependencies = [
 
 [[package]]
 name = "handle-errors"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "reqwest",
  "reqwest-middleware",
@@ -1304,6 +1305,16 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "mock-server"
+version = "1.0.0"
+dependencies = [
+ "bytes",
+ "serde_json",
+ "tokio",
+ "warp",
 ]
 
 [[package]]

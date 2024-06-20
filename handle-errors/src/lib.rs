@@ -36,18 +36,18 @@ impl std::fmt::Display for APILayerError {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Error::ParseError(ref err) => write!(f, "cannot parse parameter: {err}"),
-            Error::MissingParameters => write!(f, "missing parameter"),
-            Error::WrongPassword => write!(f, "wrong password"),
-            Error::CannotDecryptToken => write!(f, "cannot decrypt token"),
-            Error::Unauthorized => write!(f, "no permission to change the underlying resource"),
-            Error::ArgonLibraryError(_) => write!(f, "cannot verify password"),
-            Error::DatabaseQueryError(_) => write!(f, "cannot update, invalid data"),
-            Error::MigrationError(_) => write!(f, "cannot migrate database"),
-            Error::ReqwestAPIError(err) => write!(f, "cannot execute: {err}"),
-            Error::MiddlewareReqwestError(err) => write!(f, "cannot execute: {err}"),
-            Error::ClientError(err) => write!(f, "external client error: {err}"),
-            Error::ServerError(err) => write!(f, "external server error: {err}"),
+            Self::ParseError(ref err) => write!(f, "cannot parse parameter: {err}"),
+            Self::MissingParameters => write!(f, "missing parameter"),
+            Self::WrongPassword => write!(f, "wrong password"),
+            Self::CannotDecryptToken => write!(f, "cannot decrypt token"),
+            Self::Unauthorized => write!(f, "no permission to change the underlying resource"),
+            Self::ArgonLibraryError(_) => write!(f, "cannot verify password"),
+            Self::DatabaseQueryError(_) => write!(f, "cannot update, invalid data"),
+            Self::MigrationError(_) => write!(f, "cannot migrate database"),
+            Self::ReqwestAPIError(err) => write!(f, "cannot execute: {err}"),
+            Self::MiddlewareReqwestError(err) => write!(f, "cannot execute: {err}"),
+            Self::ClientError(err) => write!(f, "external client error: {err}"),
+            Self::ServerError(err) => write!(f, "external server error: {err}"),
         }
     }
 }
@@ -59,11 +59,18 @@ const DUPLICATE_KEY: u32 = 23505;
 
 #[instrument]
 pub async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
+    #[allow(clippy::equatable_if_let)]
     if let Some(crate::Error::DatabaseQueryError(e)) = r.find() {
         event!(Level::ERROR, "database query error");
         match e {
             sqlx::Error::Database(err) => {
-                if err.code().unwrap().parse::<u32>().unwrap() == DUPLICATE_KEY {
+                if err
+                    .code()
+                    .expect("error code not found")
+                    .parse::<u32>()
+                    .expect("failed to parse error code")
+                    == DUPLICATE_KEY
+                {
                     Ok(warp::reply::with_status(
                         "Account already exsists".to_string(),
                         StatusCode::UNPROCESSABLE_ENTITY,

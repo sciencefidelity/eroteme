@@ -9,9 +9,6 @@ repository = "https://github.com/sciencefidelity/eroteme"
 license = "MIT or Apache-2.0"
 exclude = ["./scripts"]
 
-[lints.rust]
-unsafe_code = "forbid"
-
 [lints.clippy]
 enum_glob_use = "deny"
 pedantic = { level = "deny", priority = 1 }
@@ -30,6 +27,7 @@ chrono = "0.4"
 clap = { version = "4.5.7", features = ["derive"] }
 dotenv = "0.15.0"
 handle-errors = { path = "handle-errors" }
+mock-server = { path ="mock-server" }
 openssl = { version = "0.10.32", features = ["vendored"] }
 paseto = "2.0"
 rand = "0.8.5"

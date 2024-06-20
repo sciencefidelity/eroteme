@@ -1,10 +1,10 @@
-use platforms::*;
+use platforms::{target::Env, TARGET_ARCH, TARGET_ENV, TARGET_OS};
 use std::{borrow::Cow, process::Command};
 
 /// Generate the `cargo:` key output
 pub fn generate_cargo_keys() {
     let output = Command::new("git")
-        .args(&["rev-parse", "--short", "HEAD"])
+        .args(["rev-parse", "--short", "HEAD"])
         .output();
 
     let commit = match output {
@@ -17,7 +17,7 @@ pub fn generate_cargo_keys() {
             Cow::from("unknown")
         }
         Err(err) => {
-            println!("cargo:warning=Failed to execute git command: {}", err);
+            println!("cargo:warning=Failed to execute git command: {err}");
             Cow::from("unknown")
         }
     };
@@ -33,7 +33,7 @@ fn get_platform() -> String {
         TARGET_ARCH.as_str(),
         TARGET_OS.as_str(),
         env_dash,
-        TARGET_ENV.map(|x| x.as_str()).unwrap_or("")
+        TARGET_ENV.map_or("", Env::as_str),
     )
 }
 
