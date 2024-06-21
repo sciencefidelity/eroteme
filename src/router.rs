@@ -1,37 +1,8 @@
-use eroteme::{routes, store::Store, Config};
-use std::env;
-use tracing_subscriber::fmt::format::FmtSpan;
-use warp::{http::Method, Filter};
+use crate::{routes, Store};
+use warp::{http::Method, reply::Reply, Filter};
 
-#[tokio::main]
-async fn main() -> Result<(), handle_errors::Error> {
-    dotenv::dotenv().ok();
-
-    let config = Config::new().expect("failed to set config");
-
-    let log_filter = format!(
-        "handle_errors={},eroteme={},warp={}",
-        config.log_level, config.log_level, config.log_level
-    );
-
-    let store = Store::new(&format!(
-        "postgres://{}:{}@{}:{}/{}",
-        config.db_user, config.db_password, config.db_host, config.db_port, config.db_name
-    ))
-    .await
-    .map_err(handle_errors::Error::DatabaseQueryError)?;
-
-    sqlx::migrate!()
-        .run(&store.clone().connection)
-        .await
-        .map_err(handle_errors::Error::MigrationError)?;
-
+pub(crate) async fn build_routes(store: Store) -> impl Filter<Extract = impl Reply> + Clone {
     let store_filter = warp::any().map(move || store.clone());
-
-    tracing_subscriber::fmt()
-        .with_env_filter(log_filter)
-        .with_span_events(FmtSpan::CLOSE)
-        .init();
 
     let cors = warp::cors()
         .allow_any_origin()
@@ -93,7 +64,7 @@ async fn main() -> Result<(), handle_errors::Error> {
         .and(warp::body::json())
         .and_then(routes::login);
 
-    let routes = get_questions
+    get_questions
         .or(update_question)
         .or(add_question)
         .or(delete_question)
@@ -102,11 +73,5 @@ async fn main() -> Result<(), handle_errors::Error> {
         .or(login)
         .with(cors)
         .with(warp::trace::request())
-        .recover(handle_errors::return_error);
-
-    tracing::info!("Eroteme build ID {}", env!("EROTEME_VERSION"));
-
-    warp::serve(routes).run(([127, 0, 0, 1], config.port)).await;
-
-    Ok(())
+        .recover(handle_errors::return_error)
 }

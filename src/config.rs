@@ -90,10 +90,6 @@ mod config_tests {
 
     #[test]
     fn unset_set_api_key() {
-        // TODO: these have default values
-        // let result = std::panic::catch_unwind(|| Config::new());
-        // assert!(result.is_err());
-
         set_env();
 
         let expected = Config {

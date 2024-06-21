@@ -1,8 +1,10 @@
 use crate::types::{Account, AccountId, Answer, AnswerId};
 use crate::types::{NewAnswer, NewQuestion, Question, QuestionId};
+use crate::Config;
 use handle_errors::Error;
 use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::Row;
+use tracing_subscriber::fmt::format::FmtSpan;
 
 #[derive(Clone, Debug)]
 pub struct Store {
@@ -266,4 +268,30 @@ impl Store {
             }
         }
     }
+}
+
+pub async fn setup_store(config: &Config) -> Result<Store, handle_errors::Error> {
+    let store = Store::new(&format!(
+        "postgres://{}:{}@{}:{}/{}",
+        config.db_user, config.db_password, config.db_host, config.db_port, config.db_name
+    ))
+    .await
+    .map_err(handle_errors::Error::DatabaseQueryError)?;
+
+    sqlx::migrate!()
+        .run(&store.clone().connection)
+        .await
+        .map_err(handle_errors::Error::MigrationError)?;
+
+    let log_filter = format!(
+        "handle_errors={},eroteme={},warp={}",
+        config.log_level, config.log_level, config.log_level
+    );
+
+    tracing_subscriber::fmt()
+        .with_env_filter(log_filter)
+        .with_span_events(FmtSpan::CLOSE)
+        .init();
+
+    Ok(store)
 }

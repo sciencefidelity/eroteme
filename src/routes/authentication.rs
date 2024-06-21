@@ -4,7 +4,7 @@ use argon2::{self, Config};
 use chrono::prelude::*;
 use rand::Rng;
 use std::{env, future};
-use warp::{http::StatusCode, Filter};
+use warp::Filter;
 
 /// # Errors
 ///
@@ -19,7 +19,7 @@ pub async fn register(store: Store, account: Account) -> Result<impl warp::Reply
     };
 
     match store.add_account(account).await {
-        Ok(_) => Ok(warp::reply::with_status("account added", StatusCode::OK)),
+        Ok(_) => Ok(warp::reply::json(&"account added".to_string())),
         Err(e) => Err(warp::reject::custom(e)),
     }
 }
@@ -92,13 +92,13 @@ fn verify_password(hash: &str, password: &[u8]) -> Result<bool, argon2::Error> {
 /// Will panic if `PASETO_KEY` env var is not set.
 fn issue_token(account_id: &AccountId) -> String {
     let key = env::var("PASETO_KEY").expect("PASETO_KEY env var not set");
+
     let current_date_time = Utc::now();
     let dt = current_date_time + chrono::Duration::days(1);
 
     paseto::tokens::PasetoBuilder::new()
         .set_encryption_key(&Vec::from(key.as_bytes()))
         .set_expiration(&dt)
-        .set_not_before(&Utc::now())
         .set_claim("account_id", serde_json::json!(account_id))
         .build()
         .expect("failed to construct paseto token with builder")
@@ -108,7 +108,9 @@ fn issue_token(account_id: &AccountId) -> String {
 pub fn auth() -> impl Filter<Extract = (Session,), Error = warp::Rejection> + Clone {
     warp::header::<String>("Authorization").and_then(|token: String| {
         let Ok(token) = verify_token(&token) else {
-            return future::ready(Err(warp::reject::reject()));
+            return future::ready(Err(warp::reject::custom(
+                handle_errors::Error::Unauthorized,
+            )));
         };
 
         future::ready(Ok(token))
