@@ -47,7 +47,9 @@ async fn main() -> Result<(), handle_errors::Error> {
         .output()
         .expect("sqlx command failed to start");
 
-    io::stdout().write_all(&s.stderr).unwrap();
+    io::stdout()
+        .write_all(&s.stderr)
+        .expect("failed to write to stdout");
 
     let s = Command::new("sqlx")
         .arg("database")
@@ -60,7 +62,9 @@ async fn main() -> Result<(), handle_errors::Error> {
         .output()
         .expect("sqlx command failed to start");
 
-    io::stdout().write_all(&s.stderr).unwrap();
+    io::stdout()
+        .write_all(&s.stderr)
+        .expect("failed to write to stdout");
 
     let store = setup_store(&config).await?;
 
@@ -79,38 +83,35 @@ async fn main() -> Result<(), handle_errors::Error> {
         .catch_unwind()
         .await;
 
-    match result {
-        Ok(_) => println!("ok"),
-        Err(_) => {
-            let _ = handler.sender.send(1);
-            process::exit(1);
-        }
+    if matches!(result, Ok(())) {
+        println!("ok");
+    } else {
+        let _ = handler.sender.send(1);
+        process::exit(1);
     }
 
     print!("running login...");
 
-    match panic::AssertUnwindSafe(login(user)).catch_unwind().await {
-        Ok(t) => {
-            token = t;
-            println!("ok");
-        }
-        Err(_) => {
-            let _ = handler.sender.send(1);
-            process::exit(1);
-        }
+    if let Ok(t) = panic::AssertUnwindSafe(login(user)).catch_unwind().await {
+        token = t;
+        println!("ok");
+    } else {
+        let _ = handler.sender.send(1);
+        process::exit(1);
     }
 
     print!("running post_question...");
 
-    match panic::AssertUnwindSafe(post_question(token))
-        .catch_unwind()
-        .await
-    {
-        Ok(_) => println!("ok"),
-        Err(_) => {
-            let _ = handler.sender.send(1);
-            process::exit(1);
-        }
+    if matches!(
+        panic::AssertUnwindSafe(post_question(token))
+            .catch_unwind()
+            .await,
+        Ok(())
+    ) {
+        println!("ok");
+    } else {
+        let _ = handler.sender.send(1);
+        process::exit(1);
     }
 
     let _ = handler.sender.send(1);
@@ -125,11 +126,12 @@ async fn register_new_user(user: &User) {
         .json(&user)
         .send()
         .await
-        .unwrap()
+        .expect("register_new_user failed")
         .json::<Value>()
-        .await;
+        .await
+        .expect("register_new_user failed");
 
-    assert_eq!(res.unwrap(), "account added".to_owned());
+    assert_eq!(res, "account added".to_owned());
 }
 
 async fn login(user: User) -> Token {
@@ -139,9 +141,9 @@ async fn login(user: User) -> Token {
         .json(&user)
         .send()
         .await
-        .unwrap();
+        .expect("login failed");
 
-    res.json::<Token>().await.unwrap()
+    res.json::<Token>().await.expect("login failed")
 }
 
 async fn post_question(token: Token) {
@@ -157,10 +159,10 @@ async fn post_question(token: Token) {
         .json(&q)
         .send()
         .await
-        .unwrap()
+        .expect("post_question failed")
         .json::<QuestionAnswer>()
         .await
-        .unwrap();
+        .expect("post_question failed");
 
     assert_eq!(res.title, q.title);
 }
