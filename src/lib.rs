@@ -14,7 +14,6 @@ use router::build_routes;
 pub mod routes;
 
 pub mod store;
-pub use store::setup_store;
 use store::Store;
 
 pub mod types;
@@ -28,6 +27,9 @@ pub async fn run(config: Config, store: Store) {
     warp::serve(routes).run(([0, 0, 0, 0], config.port)).await;
 }
 
+/// # Panics
+///
+/// Will panic if socket address in not valid.
 pub async fn oneshot(store: Store) -> OneShotHandler {
     let routes = build_routes(store).await;
     let (tx, rx) = oneshot::channel::<i32>();

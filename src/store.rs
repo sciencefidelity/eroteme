@@ -270,7 +270,10 @@ impl Store {
     }
 }
 
-pub async fn setup_store(config: &Config) -> Result<Store, handle_errors::Error> {
+/// # Errors
+///
+/// Will return `Err` if the database migration fails.
+pub async fn setup(config: &Config) -> Result<Store, handle_errors::Error> {
     let store = Store::new(&format!(
         "postgres://{}:{}@{}:{}/{}",
         config.db_user, config.db_password, config.db_host, config.db_port, config.db_name

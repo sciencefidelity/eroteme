@@ -1,4 +1,4 @@
-use eroteme::{oneshot, setup_store, Config};
+use eroteme::{oneshot, store, Config};
 use futures_util::FutureExt;
 use reqwest::header;
 use serde::{Deserialize, Serialize};
@@ -66,7 +66,7 @@ async fn main() -> Result<(), handle_errors::Error> {
         .write_all(&s.stderr)
         .expect("failed to write to stdout");
 
-    let store = setup_store(&config).await?;
+    let store = store::setup(&config).await?;
 
     let handler = oneshot(store).await;
 

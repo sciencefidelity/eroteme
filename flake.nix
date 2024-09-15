@@ -19,7 +19,9 @@
       {
         devShells.default = mkShell {
           buildInputs = [
+            docker-client
             pkg-config
+            postgresql
             sqlx-cli
             (rust-bin.stable.latest.default.override {
               extensions = [ "rust-analyzer" "rust-src" ];

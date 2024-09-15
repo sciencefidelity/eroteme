@@ -60,7 +60,7 @@ pub(crate) async fn build_routes(store: Store) -> impl Filter<Extract = impl Rep
     let login = warp::post()
         .and(warp::path("login"))
         .and(warp::path::end())
-        .and(store_filter.clone())
+        .and(store_filter)
         .and(warp::body::json())
         .and_then(routes::login);
 
