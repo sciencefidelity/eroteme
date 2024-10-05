@@ -20,9 +20,11 @@
         devShells.default = mkShell {
           buildInputs = [
             docker-client
+            openssl_3_3
             pkg-config
             postgresql
             sqlx-cli
+            taplo
             (rust-bin.stable.latest.default.override {
               extensions = [ "rust-analyzer" "rust-src" ];
             })

@@ -1,15 +1,28 @@
 [package]
 name = "eroteme"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+description.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+exclude = ["./scripts"]
+
+[workspace]
+members = ["crates/handle-errors", "crates/mock-server"]
+resolver = "2"
+
+[workspace.package]
 version = "1.0.0"
-authors = ["Matt Cook <hello@mattcook.dev>"] 
+authors = ["Matt Cook <hello@mattcook.dev>"]
 edition = "2021"
 description = "Q&A API"
 readme = "README.md"
 repository = "https://github.com/sciencefidelity/eroteme"
 license = "MIT or Apache-2.0"
-exclude = ["./scripts"]
 
-[lints.clippy]
+[workspace.lints.clippy]
 enum_glob_use = "deny"
 pedantic = { level = "deny", priority = 1 }
 nursery = { level = "deny", priority = 2 }
@@ -24,20 +37,26 @@ strip = "symbols"
 
 [dependencies]
 chrono = "0.4"
-clap = { version = "4.5.7", features = ["derive"] }
-dotenv = "0.15.0"
-handle-errors = { path = "handle-errors" }
-mock-server = { path ="mock-server" }
+clap = { version = "4", features = ["derive"] }
+dotenv = "0.15"
+futures-util = "0.3"
+handle-errors = { path = "crates/handle-errors" }
+mock-server = { path = "crates/mock-server" }
 openssl = { version = "0.10.32", features = ["vendored"] }
-paseto = "2.0"
-rand = "0.8.5"
+paseto = "2"
+rand = "0.8"
 reqwest = { version = "0.12", features = ["json"] }
 reqwest-middleware = "0.3"
 reqwest-retry = "0.5"
-rust-argon2 = "2.1"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-sqlx = { version = "0.7", features = ["runtime-tokio", "tls-rustls", "migrate", "postgres"] }
+rust-argon2 = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sqlx = { version = "0.7", features = [
+  "runtime-tokio",
+  "tls-rustls",
+  "migrate",
+  "postgres",
+] }
 tokio = { version = "1", features = ["full"] }
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -45,4 +64,4 @@ uuid = { version = "0.8", features = ["v4"] }
 warp = "0.3"
 
 [build-dependencies]
-platforms = "2.0.0"
+platforms = "2"

@@ -102,7 +102,7 @@ mod pagination_tests {
         params.insert(String::from("limit"), String::from("1"));
         params.insert(String::from("offset"), String::from("NOT_A_NUMBER"));
         let pagination_result = format!("{}", extract_pagination(&params).unwrap_err());
-        let expected = format!("cannot parse parameter: invalid digit found in string");
+        let expected = "cannot parse parameter: invalid digit found in string".to_owned();
         assert_eq!(pagination_result, expected);
     }
 
@@ -112,7 +112,7 @@ mod pagination_tests {
         params.insert(String::from("limit"), String::from("NOT_A_NUMBER"));
         params.insert(String::from("offset"), String::from("1"));
         let pagination_result = format!("{}", extract_pagination(&params).unwrap_err());
-        let expected = format!("cannot parse parameter: invalid digit found in string");
+        let expected = "cannot parse parameter: invalid digit found in string".to_owned();
         assert_eq!(pagination_result, expected);
     }
 }
