@@ -29,7 +29,7 @@ pub async fn register(store: Store, account: Account) -> Result<impl warp::Reply
 /// Will panic if `hash_encoded` fails to hash password.
 #[must_use]
 pub fn hash_password(password: &[u8]) -> String {
-    let salt = rand::thread_rng().gen::<[u8; 32]>();
+    let salt: [u8; 32] = rand::thread_rng().r#gen();
     let config = Config::default();
     argon2::hash_encoded(password, &salt, &config).expect("failed to hash password")
 }

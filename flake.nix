@@ -7,7 +7,7 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, rust-overlay, flake-utils, ... }:
+  outputs = { nixpkgs, rust-overlay, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
@@ -20,17 +20,22 @@
         devShells.default = mkShell {
           buildInputs = [
             docker-client
-            openssl_3_3
+            openssl
             pkg-config
             postgresql
             sqlx-cli
+            sqruff
             taplo
             (rust-bin.stable.latest.default.override {
               extensions = [ "rust-analyzer" "rust-src" ];
             })
-          ];
+          ] ++ (if pkgs.stdenv.isLinux then [ pkgs.cargo-llvm-cov pkgs.clang pkgs.mold-wrapped ] else [ ]);
 
-          shellHook = ''
+          shellHook = /*bash*/ ''
+          ''
+          # enable mold linker for Linux
+          + pkgs.lib.optionalString pkgs.stdenv.isLinux /*bash*/ ''
+            export RUSTFLAGS="-C linker=clang -C link-arg=-fuse-ld=${pkgs.mold-wrapped}/bin/mold"
           '';
         };
       }

@@ -1,3 +1,5 @@
+#![allow(clippy::missing_panics_doc, clippy::missing_errors_doc)]
+
 use tracing::{event, instrument, Level};
 use warp::filters::body::BodyDeserializeError;
 use warp::filters::cors::CorsForbidden;
@@ -36,7 +38,7 @@ impl std::fmt::Display for APILayerError {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Self::ParseError(ref err) => write!(f, "cannot parse parameter: {err}"),
+            Self::ParseError(err) => write!(f, "cannot parse parameter: {err}"),
             Self::MissingParameters => write!(f, "missing parameter"),
             Self::WrongPassword => write!(f, "wrong password"),
             Self::CannotDecryptToken => write!(f, "cannot decrypt token"),

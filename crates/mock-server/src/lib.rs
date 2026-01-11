@@ -56,7 +56,7 @@ impl MockServer {
     }
 
     #[allow(clippy::unused_self)]
-    fn build_routes(&self) -> impl Filter<Extract = impl Reply> + Clone {
+    fn build_routes(&self) -> impl Filter<Extract = impl Reply> + Clone + 'static {
         warp::post()
             .and(warp::path("bad_words"))
             .and(warp::query())
